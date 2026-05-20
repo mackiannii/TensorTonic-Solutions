@@ -9,5 +9,5 @@ def vector_norms(v):
     euclidean_len = np.sqrt(np.sum((v)**2))
     max_abs_val = np.max(np.abs((v)))
 
-    return [man_distance, euclidean_len, max_abs_val]
+    return np.array([man_distance, euclidean_len, max_abs_val])
     
