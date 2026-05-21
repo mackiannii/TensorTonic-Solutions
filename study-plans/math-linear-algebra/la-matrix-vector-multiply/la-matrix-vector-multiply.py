@@ -6,14 +6,12 @@ def matrix_vector_multiply(A, x):
     """
     A = np.array(A)
     x = np.array(x)
-    rows, cols = A.shape
+    rows, cols = A.shape 
     result = np.zeros(rows)
+
     for i in range(rows):
         total = 0
         for j in range(cols):
             total += A[i][j] * x[j]
         result[i] = total
     return result
-            
-            
-    
