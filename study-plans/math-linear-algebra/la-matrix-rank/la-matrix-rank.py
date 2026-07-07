@@ -1,50 +1,60 @@
 import numpy as np
 
 def matrix_rank(A):
-    # Convert every entry to float so row operations use decimal division
-    A = [list(map(float, row)) for row in A]
+    # Make a copy of A as floats so we can safely divide during elimination
+    working_matrix = [list(map(float, row)) for row in A]
 
-    rows = len(A)
-    cols = len(A[0])
+    num_rows = len(working_matrix)
+    num_cols = len(working_matrix[0])
 
-    # rank also tells us where the next pivot row should be placed
-    rank = 0
+    # This counts how many pivots we have found.
+    # It also tells us which row the next pivot should be moved into.
+    next_pivot_row = 0
 
-    # Move left to right through each column looking for pivots
-    for c in range(cols):
+    # Try to find one pivot in each column, moving left to right
+    for pivot_col in range(num_cols):
 
-        # We have not found a pivot row for this column yet
-        pivot_row = None
+        # We have not found a usable pivot row in this column yet
+        found_pivot_row = None
 
-        # Search downward from the current rank row.
-                # Rows above rank already have pivots, so we skip them.
-
-        for r in range(rank, rows):
-            if A[r][c] != 0:
-                pivot_row = r
+        # Search downward from next_pivot_row.
+        # Rows above next_pivot_row already contain pivots.
+        for candidate_row in range(next_pivot_row, num_rows):
+            if working_matrix[candidate_row][pivot_col] != 0:
+                found_pivot_row = candidate_row
                 break
-        
-        # If this entire column has no usable pivot, move to the next column
 
-        if pivot_row is None:
+        # If every entry in this column below next_pivot_row is zero,
+        # then this column cannot give us a new pivot.
+        if found_pivot_row is None:
             continue
-        
-        # Move the pivot row into the next available pivot position. Rank is the next pivot row
-        A[rank], A[pivot_row] = A[pivot_row], A[rank]
 
-        # The pivot value is the entry at the pivot row and current column
-        pivot = A[rank][c]
+        # Move the found pivot row into the official pivot position
+        working_matrix[next_pivot_row], working_matrix[found_pivot_row] = (
+            working_matrix[found_pivot_row],
+            working_matrix[next_pivot_row],
+        )
 
-        # Use the pivot row to eliminate entries below the pivot
-        for r in range(rank+1, rows):
-            factor = A[r][c] / pivot
-        
-        # Start at column c because entries before c do not matter for this pivot step
-            for j in range(c, cols):
-                A[r][j] -= factor * A[rank][j] 
-        
+        # Get the pivot value after the swap
+        pivot_value = working_matrix[next_pivot_row][pivot_col]
 
-        # We successfully found one more pivot, so rank increases by 1
-        rank += 1
+        # Use the pivot row to eliminate all entries below the pivot
+        for row_to_eliminate in range(next_pivot_row + 1, num_rows):
 
-    return rank
+            # How much of the pivot row do we subtract from this row?
+            elimination_factor = (
+                working_matrix[row_to_eliminate][pivot_col] / pivot_value
+            )
+
+            # Update this row from pivot_col onward
+            for col_to_update in range(pivot_col, num_cols):
+                working_matrix[row_to_eliminate][col_to_update] -= (
+                    elimination_factor
+                    * working_matrix[next_pivot_row][col_to_update]
+                )
+
+        # We successfully found one more pivot
+        next_pivot_row += 1
+
+    # Number of pivots found equals the rank
+    return next_pivot_row
